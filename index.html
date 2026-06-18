@@ -484,8 +484,7 @@
 
     .footer-meta { text-align: right; display: flex; flex-direction: column; gap: 8px; }
     .footer-meta span { font-size: 11px; color: var(--gray-mid); letter-spacing: 0.1em; }
-    .footer-meta a { font-size: 11px; color: var(--gray-light); text-decoration: none; letter-spacing: 0.1em; transition: color 0.3s;
-}
+    .footer-meta a { font-size: 11px; color: var(--gray-light); text-decoration: none; letter-spacing: 0.1em; transition: color 0.3s; }
     .footer-meta a:hover { color: var(--white); }
 
     /* ── KEYFRAMES ── */
@@ -526,12 +525,177 @@
     }
 
     /* ── RESPONSIVE ── */
+
+    /* ── NAV LOGO IMG ── */
+    .nav-logo-img {
+      height: 32px;
+      width: auto;
+      display: block;
+      opacity: 0.9;
+      transition: opacity 0.3s;
+      filter: brightness(1);
+    }
+    .nav-logo:hover .nav-logo-img { opacity: 1; }
+    nav.light .nav-logo-img { filter: invert(1) brightness(0); }
+
+    /* ── FOOTER LOGO ── */
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .footer-logo-img {
+      height: 24px;
+      width: auto;
+      opacity: 0.6;
+    }
+    .footer-logo span {
+      font-family: var(--serif);
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gray-lighter);
+    }
+
+    /* ── BRAND KIT SECTION ── */
+    #brand-kit {
+      background: #0d0d0d;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .brand-heading {
+      font-family: var(--serif);
+      font-size: clamp(32px, 4vw, 56px);
+      font-weight: 400;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+
+    .brand-sub {
+      font-size: 14px;
+      color: var(--gray-light);
+      margin-bottom: 64px;
+      max-width: 480px;
+      line-height: 1.75;
+    }
+
+    .brand-download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 40px;
+      border: 1px solid rgba(201,168,76,0.5);
+      background: transparent;
+      color: #c9a84c;
+      font-family: var(--sans);
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: background 0.3s, border-color 0.3s, color 0.3s;
+      cursor: none;
+      margin-bottom: 80px;
+    }
+
+    .brand-download-btn:hover {
+      background: rgba(201,168,76,0.08);
+      border-color: #c9a84c;
+      color: #e0c070;
+    }
+
+    .brand-download-btn svg { transition: transform 0.3s; }
+    .brand-download-btn:hover svg { transform: translateY(3px); }
+
+    .brand-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      max-width: 800px;
+    }
+
+    .brand-card {
+      background: var(--gray-dark);
+      padding: 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      min-height: 220px;
+      transition: background 0.3s;
+    }
+
+    .brand-card:hover { background: #1e1e1e; }
+
+    .brand-card.light-bg {
+      background: #f5f4f0;
+    }
+    .brand-card.light-bg:hover { background: #edecea; }
+
+    .brand-card img {
+      height: 64px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .brand-card-label {
+      font-size: 10px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--gray-light);
+    }
+
+    .brand-card.light-bg .brand-card-label { color: #888; }
+
+    .brand-divider {
+      width: 40px;
+      height: 1px;
+      background: rgba(255,255,255,0.1);
+      margin: 40px 0;
+    }
+
+    .brand-biz-grid {
+      display: none;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      max-width: 600px;
+      margin-top: 40px;
+    }
+
+    .brand-biz-card {
+      background: var(--gray-dark);
+      padding: 24px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      overflow: hidden;
+    }
+
+    .brand-biz-card img {
+      width: 100%;
+      height: auto;
+      display: block;
+      opacity: 0.9;
+      transition: opacity 0.3s;
+    }
+
+    .brand-biz-card:hover img { opacity: 1; }
+
+    .brand-usage-note {
+      margin-top: 40px;
+      font-size: 12px;
+      color: var(--gray-mid);
+      line-height: 1.8;
+      border-left: 1px solid var(--gray-mid);
+      padding-left: 16px;
+      max-width: 480px;
+    }
+
     @media (max-width: 900px) {
       nav { padding: 24px; }
       .nav-links { display: none; }
       section { padding: 80px 24px; }
       #hero { padding: 0 24px 80px; }
-      .thesis-grid, .apply-grid, .focus-grid { grid-template-columns: 1fr; gap: 48px; }
+      .thesis-grid, .apply-grid, .focus-grid, .brand-grid { grid-template-columns: 1fr; gap: 2px; }
       .pillars { grid-template-columns: 1fr; }
       .focus-left { position: static; }
       .focus-item { grid-template-columns: 1fr; gap: 8px; }
@@ -557,12 +721,13 @@
 
 <!-- NAV -->
 <nav id="nav">
-  <a href="#" class="nav-logo">Windy Venture Capital</a>
+  <a href="#" class="nav-logo" aria-label="Windy Venture Capital"><img src="https://raw.githubusercontent.com/rockarge/windyventurecapital/main/assets/WVC_Mark_Light.png" alt="WVC" class="nav-logo-img" /></a>
   <ul class="nav-links">
     <li><a href="#thesis">Thesis</a></li>
     <li><a href="#model">Model</a></li>
     <li><a href="#focus">Focus</a></li>
     <li><a href="#apply">Apply</a></li>
+    <li><a href="#brand-kit">Brand</a></li>
   </ul>
 </nav>
 
@@ -732,9 +897,40 @@
   </div>
 </section>
 
+<!-- BRAND KIT -->
+<section id="brand-kit">
+  <div class="section-inner">
+    <div class="section-label r">Brand &amp; Press</div>
+    <h2 class="brand-heading r r-d1">Brand Assets</h2>
+    <p class="brand-sub r r-d2">Download our brand kit — logos, guidelines, and assets for press and partner use.</p>
+
+    <a href="https://raw.githubusercontent.com/rockarge/windyventurecapital/main/assets/WVC_Brand_Kit_Complete.pdf" download="WVC_Brand_Kit.pdf" target="_blank" class="brand-download-btn r r-d3">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 1v9M8 10l-3-3M8 10l3-3M2 13h12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Download Brand Kit
+    </a>
+
+    <div class="brand-grid r r-d2">
+      <div class="brand-card">
+        <img src="https://raw.githubusercontent.com/rockarge/windyventurecapital/main/assets/WVC_Mark_Light.png" alt="WVC Mark — Light" />
+        <span class="brand-card-label">Mark · Dark Background</span>
+      </div>
+      <div class="brand-card light-bg">
+        <img src="https://raw.githubusercontent.com/rockarge/windyventurecapital/main/assets/WVC_Mark_Light.png" alt="WVC Mark — Dark" style="filter:invert(1) brightness(0);" />
+        <span class="brand-card-label">Mark · Light Background</span>
+      </div>
+    </div>
+
+    <div class="brand-divider r r-d3"></div>
+
+    <p class="brand-usage-note r r-d4">For editorial use only. Do not alter, distort, or apply effects to the mark. Contact hello@windyventurecapital.com for permissions.</p>
+  </div>
+</section>
+
 <!-- FOOTER -->
 <footer>
-  <div class="footer-logo">Windy Venture Capital LLC</div>
+  <div class="footer-logo"><img src="https://raw.githubusercontent.com/rockarge/windyventurecapital/main/assets/WVC_Mark_Light.png" alt="WVC" class="footer-logo-img" /><span>Windy Venture Capital LLC</span></div>
   <div class="footer-meta">
     <span>Wyoming, United States</span>
     <span>Est. July 2025</span>
