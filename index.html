@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Windy Venture Capital</title>
+  <meta name="description" content="A self-sustaining ecosystem. We build the builders." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #0a0a0a;
+      --white: #f5f4f0;
+      --gray-dark: #1a1a1a;
+      --gray-mid: #3a3a3a;
+      --gray-light: #8a8a8a;
+      --gray-lighter: #c8c8c8;
+      --serif: 'EB Garamond', Georgia, serif;
+      --sans: 'Inter', system-ui, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: var(--sans);
+      font-weight: 300;
+      line-height: 1.6;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* ── CANVAS BACKGROUND ── */
+    #wind-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.35;
+    }
+
+    /* Everything above canvas */
+    nav, section, footer { position: relative; z-index: 2; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 28px 60px;
+      transition: all 0.5s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    .nav-logo {
+      font-family: var(--serif);
+      font-size: 15px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--white);
+      text-decoration: none;
+      opacity: 0.9;
+      transition: color 0.4s;
+    }
+
+    .nav-links { display: flex; gap: 40px; list-style: none; }
+
+    .nav-links a {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gray-lighter);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover { color: var(--white); }
+
+    /* light nav state */
+    nav.light { background: rgba(245,244,240,0.92) !important; backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0,0,0,0.06) !important; }
+    nav.light .nav-logo { color: #111; }
+    nav.light .nav-links a { color: #555; }
+    nav.light .nav-links a:hover { color: #111; }
+
+    /* scrolled state */
+    nav.scrolled {
+      background: rgba(10,10,10,0.88);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding: 18px 60px;
+    }
+
+    /* ── SCROLL PROGRESS ── */
+    #progress {
+      position: fixed; top: 0; left: 0;
+      height: 1px; width: 0%;
+      background: rgba(255,255,255,0.3);
+      z-index: 200;
+      transition: width 0.05s linear;
+      mix-blend-mode: difference;
+    }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 60px 80px;
+      overflow: hidden;
+    }
+
+    .hero-content { will-change: transform; }
+
+    .hero-eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gray-light);
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: riseIn 1s cubic-bezier(0.16,1,0.3,1) 0.2s forwards;
+    }
+
+    .hero-heading {
+      font-family: var(--serif);
+      font-size: clamp(52px, 8vw, 110px);
+      font-weight: 400;
+      line-height: 1.02;
+      letter-spacing: -0.01em;
+      max-width: 900px;
+      opacity: 0;
+      animation: riseIn 1.1s cubic-bezier(0.16,1,0.3,1) 0.4s forwards;
+    }
+
+    .hero-heading em { font-style: italic; color: var(--gray-lighter); }
+
+    .hero-sub {
+      margin-top: 40px;
+      max-width: 440px;
+      font-size: 14px;
+      color: var(--gray-light);
+      line-height: 1.8;
+      border-left: 1px solid var(--gray-mid);
+      padding-left: 20px;
+      opacity: 0;
+      animation: riseIn 1s cubic-bezier(0.16,1,0.3,1) 0.7s forwards;
+    }
+
+    /* ticker at bottom of hero */
+    .hero-ticker {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 38px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      opacity: 0;
+      animation: riseIn 1s cubic-bezier(0.16,1,0.3,1) 1.1s forwards;
+    }
+
+    .ticker-track {
+      display: flex;
+      gap: 0;
+      white-space: nowrap;
+      animation: ticker 35s linear infinite;
+      font-size: 10px;
+      letter-spacing: 0.28em;
+      color: rgba(255,255,255,0.15);
+      text-transform: uppercase;
+    }
+
+    .ticker-track span { padding: 0 48px; }
+
+    .hero-scroll-hint {
+      position: absolute;
+      bottom: 50px;
+      right: 60px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gray-light);
+      opacity: 0;
+      animation: riseIn 1s cubic-bezier(0.16,1,0.3,1) 1.3s forwards;
+    }
+
+    .hero-scroll-hint::before {
+      content: '';
+      display: block; width: 36px; height: 1px;
+      background: var(--gray-mid);
+    }
+
+    .scroll-arrow {
+      display: inline-block;
+      animation: bounce 2.2s ease-in-out infinite;
+    }
+
+    /* ── SECTION BASE ── */
+    section { padding: 140px 60px; }
+
+    /* parallax wrapper on all sections */
+    .section-inner { will-change: transform; }
+
+    .section-label {
+      font-size: 10px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--gray-light);
+      margin-bottom: 64px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .section-label::after {
+      content: '';
+      display: block;
+      width: 0;
+      height: 1px;
+      background: var(--gray-mid);
+      transition: width 1.4s cubic-bezier(0.16,1,0.3,1) 0.2s;
+    }
+
+    .section-label.revealed::after { width: 40px; }
+
+    /* ── REVEAL SYSTEM ── */
+    .r {
+      opacity: 0;
+      transform: translateY(44px);
+      transition:
+        opacity 0.9s cubic-bezier(0.16,1,0.3,1),
+        transform 0.9s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    .r.in { opacity: 1; transform: translateY(0); }
+    .r-d1 { transition-delay: 0.12s; }
+    .r-d2 { transition-delay: 0.24s; }
+    .r-d3 { transition-delay: 0.38s; }
+    .r-d4 { transition-delay: 0.52s; }
+
+    /* ── THESIS ── */
+    #thesis { border-top: 1px solid rgba(255,255,255,0.06); }
+
+    .thesis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+
+    .thesis-statement {
+      font-family: var(--serif);
+      font-size: clamp(28px, 3.5vw, 46px);
+      font-weight: 400;
+      line-height: 1.25;
+    }
+
+    .thesis-statement em { font-style: italic; color: var(--gray-lighter); }
+
+    .thesis-body p {
+      font-size: 15px;
+      color: var(--gray-light);
+      line-height: 1.9;
+      margin-bottom: 20px;
+    }
+
+    .thesis-body p:last-child { margin-bottom: 0; }
+
+    /* ── MODEL ── */
+    #model { background: #0f0f0f; border-top: 1px solid rgba(255,255,255,0.06); }
+
+    .model-intro {
+      font-family: var(--serif);
+      font-size: clamp(22px, 2.5vw, 34px);
+      font-weight: 400;
+      max-width: 680px;
+      line-height: 1.4;
+      margin-bottom: 80px;
+    }
+
+    .pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+
+    .pillar {
+      background: var(--gray-dark);
+      padding: 48px 40px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      transition: background 0.3s, transform 0.45s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    .pillar:hover { background: #1e1e1e; transform: translateY(-8px); }
+
+    .pillar-num {
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      color: var(--gray-light);
+      margin-bottom: 32px;
+    }
+
+    .pillar-title { font-family: var(--serif); font-size: 22px; font-weight: 400; margin-bottom: 16px; line-height: 1.2; }
+
+    .pillar-desc { font-size: 13px; color: var(--gray-light); line-height: 1.8; }
+
+    /* ── FOCUS ── */
+    #focus { border-top: 1px solid rgba(255,255,255,0.06); }
+
+    .focus-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 120px; align-items: start; }
+
+    .focus-left { position: sticky; top: 100px; }
+
+    .focus-heading {
+      font-family: var(--serif);
+      font-size: clamp(32px, 4vw, 52px);
+      font-weight: 400;
+      line-height: 1.2;
+      margin-bottom: 24px;
+    }
+
+    .focus-sub { font-size: 13px; color: var(--gray-light); line-height: 1.8; }
+
+    .focus-items { display: flex; flex-direction: column; }
+
+    .focus-item {
+      padding: 32px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 40px;
+    }
+
+    .focus-item:first-child { border-top: 1px solid rgba(255,255,255,0.06); }
+
+    .focus-tag { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gray-light); padding-top: 4px; }
+
+    .focus-text { font-size: 15px; color: var(--gray-lighter); line-height: 1.75; }
+
+    /* ── APPLY ── */
+    #apply {
+      background: var(--white);
+      color: var(--black);
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    #apply .section-label { color: #777; }
+    #apply .section-label::after { background: #ccc; }
+
+    .apply-heading {
+      font-family: var(--serif);
+      font-size: clamp(36px, 5vw, 70px);
+      font-weight: 400;
+      line-height: 1.1;
+      max-width: 700px;
+      margin-bottom: 60px;
+      color: var(--black);
+    }
+
+    .apply-heading em { font-style: italic; color: #999; }
+
+    .apply-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; }
+
+    .apply-body p { font-size: 14px; color: #555; line-height: 1.9; margin-bottom: 16px; }
+
+    .apply-criteria { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+
+    .apply-criteria li { font-size: 13px; color: #444; display: flex; align-items: flex-start; gap: 14px; }
+
+    .apply-criteria li::before { content: '—'; color: #aaa; flex-shrink: 0; margin-top: 1px; }
+
+    .apply-form { display: flex; flex-direction: column; gap: 20px; }
+
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+
+    .form-group label { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: #888; }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid #ccc;
+      padding: 10px 0;
+      font-family: var(--sans);
+      font-size: 14px;
+      color: var(--black);
+      outline: none;
+      transition: border-color 0.3s;
+      width: 100%;
+      resize: none;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus { border-bottom-color: var(--black); }
+
+    .form-group textarea { min-height: 80px; }
+    .form-group select { appearance: none; cursor: pointer; }
+    .form-group select option { background: #fff; color: #000; }
+
+    .btn-submit {
+      margin-top: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 0;
+      background: none;
+      border: none;
+      border-bottom: 2px solid var(--black);
+      font-family: var(--sans);
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--black);
+      cursor: none;
+      transition: opacity 0.3s;
+      width: fit-content;
+    }
+
+    .btn-submit:hover { opacity: 0.5; }
+    .btn-submit svg { transition: transform 0.3s; }
+    .btn-submit:hover svg { transform: translateX(4px); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--black);
+      padding: 60px 60px 40px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+
+    .footer-logo {
+      font-family: var(--serif);
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gray-lighter);
+    }
+
+    .footer-meta { text-align: right; display: flex; flex-direction: column; gap: 8px; }
+    .footer-meta span { font-size: 11px; color: var(--gray-mid); letter-spacing: 0.1em; }
+    .footer-meta a { font-size: 11px; color: var(--gray-light); text-decoration: none; letter-spacing: 0.1em; transition: color 0.3s; }
+    .footer-meta a:hover { color: var(--white); }
+
+    /* ── KEYFRAMES ── */
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(36px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); opacity: 0.5; }
+      50%       { transform: translateY(7px); opacity: 1; }
+    }
+
+    /* ── CURSOR ── */
+    #cursor-dot {
+      position: fixed; width: 6px; height: 6px;
+      background: white; border-radius: 50%;
+      pointer-events: none; z-index: 9999;
+      transform: translate(-50%,-50%);
+      mix-blend-mode: difference;
+      transition: transform 0.15s, width 0.3s, height 0.3s;
+    }
+
+    #cursor-ring {
+      position: fixed; width: 32px; height: 32px;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 50%; pointer-events: none; z-index: 9998;
+      transform: translate(-50%,-50%);
+      mix-blend-mode: difference;
+      transition: width 0.35s cubic-bezier(0.16,1,0.3,1),
+                  height 0.35s cubic-bezier(0.16,1,0.3,1),
+                  border-color 0.35s;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      nav { padding: 24px; }
+      .nav-links { display: none; }
+      section { padding: 80px 24px; }
+      #hero { padding: 0 24px 80px; }
+      .thesis-grid, .apply-grid, .focus-grid { grid-template-columns: 1fr; gap: 48px; }
+      .pillars { grid-template-columns: 1fr; }
+      .focus-left { position: static; }
+      .focus-item { grid-template-columns: 1fr; gap: 8px; }
+      footer { flex-direction: column; gap: 24px; align-items: flex-start; }
+      .footer-meta { text-align: left; }
+      .hero-scroll-hint { display: none; }
+      body { cursor: auto; }
+      #cursor-dot, #cursor-ring { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- WIND CANVAS -->
+<canvas id="wind-canvas"></canvas>
+
+<!-- CURSOR -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- SCROLL PROGRESS -->
+<div id="progress"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-logo">Windy Venture Capital</a>
+  <ul class="nav-links">
+    <li><a href="#thesis">Thesis</a></li>
+    <li><a href="#model">Model</a></li>
+    <li><a href="#focus">Focus</a></li>
+    <li><a href="#apply">Apply</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-content">
+    <p class="hero-eyebrow">Wyoming, USA &nbsp;·&nbsp; Est. 2025</p>
+    <h1 class="hero-heading">
+      We build<br />
+      the <em>builders.</em>
+    </h1>
+    <p class="hero-sub">
+      A self-sustaining ecosystem — nurturing the minds that create,
+      then backing them as they grow. Not just capital. A system.
+    </p>
+  </div>
+  <span class="hero-scroll-hint">Scroll &nbsp;<span class="scroll-arrow">↓</span></span>
+  <div class="hero-ticker">
+    <div class="ticker-track">
+      <span>Windy Venture Capital</span><span>·</span>
+      <span>Wyoming, USA</span><span>·</span>
+      <span>Est. 2025</span><span>·</span>
+      <span>Building Builders</span><span>·</span>
+      <span>Self-Sustaining Ecosystem</span><span>·</span>
+      <span>Windy Venture Capital</span><span>·</span>
+      <span>Wyoming, USA</span><span>·</span>
+      <span>Est. 2025</span><span>·</span>
+      <span>Building Builders</span><span>·</span>
+      <span>Self-Sustaining Ecosystem</span><span>·</span>
+    </div>
+  </div>
+</section>
+
+<!-- THESIS -->
+<section id="thesis">
+  <div class="section-inner">
+    <div class="section-label r">Thesis</div>
+    <div class="thesis-grid">
+      <div>
+        <h2 class="thesis-statement r r-d1">
+          Capital that <em>compounds</em><br />beyond returns.
+        </h2>
+      </div>
+      <div class="thesis-body r r-d2">
+        <p>Most venture firms deploy capital into companies. We deploy capital into people — the rare minds that see problems others ignore and build solutions that outlast trends.</p>
+        <p>Our ecosystem is designed to be self-sustaining. Portfolio returns fund the next generation of founders. Knowledge flows between cohorts. The network compounds. The whole becomes larger than the sum of its parts.</p>
+        <p>We believe the greatest leverage in venture is not picking winners — it is creating the conditions where more winners become possible.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MODEL -->
+<section id="model">
+  <div class="section-inner">
+    <div class="section-label r">Model</div>
+    <p class="model-intro r r-d1">Two mandates. One flywheel.</p>
+    <div class="pillars">
+      <div class="pillar r r-d1">
+        <div class="pillar-num">01</div>
+        <h3 class="pillar-title">Cultivate</h3>
+        <p class="pillar-desc">We identify and develop entrepreneurial talent before they have a product. Mentorship, tooling, and a community of operators — building the builder before building the company.</p>
+      </div>
+      <div class="pillar r r-d2">
+        <div class="pillar-num">02</div>
+        <h3 class="pillar-title">Back</h3>
+        <p class="pillar-desc">When the right founder meets the right moment, we invest. Early-stage conviction, patient capital, and active support — not just a term sheet but a genuine partnership.</p>
+      </div>
+      <div class="pillar r r-d3">
+        <div class="pillar-num">03</div>
+        <h3 class="pillar-title">Reinvest</h3>
+        <p class="pillar-desc">Returns cycle back into the ecosystem. Successful founders become mentors and angels. Knowledge becomes infrastructure. The flywheel accelerates with each turn.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOCUS -->
+<section id="focus">
+  <div class="section-inner">
+    <div class="section-label r">Focus</div>
+    <div class="focus-grid">
+      <div class="focus-left r">
+        <h2 class="focus-heading">What we<br />look for.</h2>
+        <p class="focus-sub">Stage-agnostic, sector-open — but certain signals are non-negotiable.</p>
+      </div>
+      <div class="focus-items">
+        <div class="focus-item r">
+          <span class="focus-tag">Founder</span>
+          <p class="focus-text">Builders with rare insight into a specific problem. We back people, not decks. Show us how you think, not just what you're building.</p>
+        </div>
+        <div class="focus-item r r-d1">
+          <span class="focus-tag">Problem</span>
+          <p class="focus-text">Real friction. Real people. We avoid solutions searching for problems. The best companies we've seen started from genuine pain the founder experienced themselves.</p>
+        </div>
+        <div class="focus-item r r-d2">
+          <span class="focus-tag">Velocity</span>
+          <p class="focus-text">Speed of learning over speed of execution. We want founders who update their beliefs with evidence and move accordingly.</p>
+        </div>
+        <div class="focus-item r r-d3">
+          <span class="focus-tag">Ecosystem fit</span>
+          <p class="focus-text">We invest in founders who give back — to the community, to other founders, to knowledge. If your only motivation is the exit, we're probably not the right partner.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- APPLY -->
+<section id="apply">
+  <div class="section-inner">
+    <div class="section-label r">Apply</div>
+    <h2 class="apply-heading r r-d1">
+      Building something<br /><em>that matters?</em>
+    </h2>
+    <div class="apply-grid">
+      <div class="apply-body r r-d2">
+        <p>We don't run formal intake cycles. If you're the right founder, the right time is now.</p>
+        <p>We review every submission ourselves. No filters, no pre-screening. If we see something worth pursuing, we'll respond within two weeks.</p>
+        <ul class="apply-criteria">
+          <li>Founders at any stage — idea to early traction</li>
+          <li>Geographically open, globally minded</li>
+          <li>No specific sector requirements</li>
+          <li>Solo founders welcome</li>
+          <li>Aspiring founders welcome — tell us what you're thinking about</li>
+        </ul>
+      </div>
+      <form class="apply-form r r-d3" action="https://formspree.io/f/REPLACE_ME" method="POST">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" name="name" placeholder="Your name" required />
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="you@company.com" required />
+        </div>
+        <div class="form-group">
+          <label for="type">I am a...</label>
+          <select id="type" name="type">
+            <option value="" disabled selected>Select one</option>
+            <option value="founder">Founder with a company</option>
+            <option value="aspiring">Aspiring founder with an idea</option>
+            <option value="lp">Potential LP / partner</option>
+            <option value="other">Something else</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="company">Company / Project</label>
+          <input type="text" id="company" name="company" placeholder="Name or description" />
+        </div>
+        <div class="form-group">
+          <label for="message">What are you building, and why you?</label>
+          <textarea id="message" name="message" placeholder="Brief and direct is fine." required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="url">Link (optional)</label>
+          <input type="url" id="url" name="url" placeholder="Website, deck, or anything relevant" />
+        </div>
+        <button type="submit" class="btn-submit">
+          Submit
+          <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
+            <path d="M1 5H15M15 5L11 1M15 5L11 9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Windy Venture Capital LLC</div>
+  <div class="footer-meta">
+    <span>Wyoming, United States</span>
+    <span>Est. July 2025</span>
+    <a href="mailto:hello@windyventurecapital.com">hello@windyventurecapital.com</a>
+  </div>
+</footer>
+
+<script>
+/* ════════════════════════════════════════════
+   WIND CANVAS — flowing lines from start to end
+   ════════════════════════════════════════════ */
+const canvas = document.getElementById('wind-canvas');
+const ctx    = canvas.getContext('2d');
+
+let W, H, particles = [], t = 0;
+
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+
+window.addEventListener('resize', resize);
+resize();
+
+// Perlin-like noise (simple)
+function noise(x, y, t) {
+  return Math.sin(x * 0.008 + t * 0.3) * Math.cos(y * 0.006 + t * 0.2)
+       + Math.sin(x * 0.003 - t * 0.15) * 0.5
+       + Math.cos(y * 0.004 + x * 0.002 + t * 0.1) * 0.3;
+}
+
+// Init particles
+function initParticles() {
+  particles = [];
+  const count = Math.floor(W * 0.22);
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      speed: 0.4 + Math.random() * 0.8,
+      life: Math.random(),
+      maxLife: 0.6 + Math.random() * 0.4,
+      size: 0.4 + Math.random() * 0.8,
+    });
+  }
+}
+
+initParticles();
+window.addEventListener('resize', initParticles);
+
+function drawWind() {
+  ctx.clearRect(0, 0, W, H);
+
+  t += 0.004;
+
+  particles.forEach(p => {
+    const angle = noise(p.x, p.y, t) * Math.PI * 2;
+    const vx = Math.cos(angle) * p.speed;
+    const vy = Math.sin(angle) * p.speed * 0.3 + p.speed * 0.12;
+
+    p.x += vx;
+    p.y += vy;
+    p.life += 0.004;
+
+    // opacity arc: fade in → hold → fade out
+    let alpha;
+    const half = p.maxLife * 0.5;
+    if (p.life < half) {
+      alpha = (p.life / half) * 0.55;
+    } else if (p.life < p.maxLife) {
+      alpha = ((p.maxLife - p.life) / half) * 0.55;
+    } else {
+      // reset
+      p.x = Math.random() * W;
+      p.y = Math.random() * H;
+      p.life = 0;
+      p.maxLife = 0.5 + Math.random() * 0.5;
+      return;
+    }
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+    ctx.fill();
+
+    // wrap
+    if (p.x > W + 10) p.x = -10;
+    if (p.x < -10)    p.x = W + 10;
+    if (p.y > H + 10) p.y = -10;
+    if (p.y < -10)    p.y = H + 10;
+  });
+
+  requestAnimationFrame(drawWind);
+}
+
+drawWind();
+
+
+/* ════════════════════════════════════════════
+   SCROLL ENGINE
+   ════════════════════════════════════════════ */
+const nav      = document.getElementById('nav');
+const progress = document.getElementById('progress');
+const heroContent = document.querySelector('.hero-content');
+const applySection = document.getElementById('apply');
+
+let scrollY = 0, ticking = false;
+
+function onScroll() {
+  scrollY = window.scrollY;
+  if (!ticking) { requestAnimationFrame(update); ticking = true; }
+}
+
+function update() {
+  ticking = false;
+
+  // progress bar
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  progress.style.width = ((scrollY / max) * 100) + '%';
+
+  // nav state
+  const isLight = applySection && scrollY > applySection.offsetTop - 80
+               && scrollY < applySection.offsetTop + applySection.offsetHeight - 80;
+
+  if (isLight) {
+    nav.classList.add('light');
+    nav.classList.remove('scrolled');
+  } else if (scrollY > 80) {
+    nav.classList.add('scrolled');
+    nav.classList.remove('light');
+  } else {
+    nav.classList.remove('scrolled', 'light');
+  }
+
+  // hero parallax
+  if (heroContent && scrollY < window.innerHeight * 1.2) {
+    const p = scrollY / window.innerHeight;
+    heroContent.style.transform = `translateY(${scrollY * 0.38}px)`;
+    heroContent.style.opacity   = Math.max(0, 1 - p * 1.3);
+  }
+
+  // section parallax — each section-inner drifts slightly
+  document.querySelectorAll('section:not(#hero) .section-inner').forEach(el => {
+    const rect = el.closest('section').getBoundingClientRect();
+    const center = rect.top + rect.height / 2 - window.innerHeight / 2;
+    el.style.transform = `translateY(${center * 0.04}px)`;
+  });
+}
+
+window.addEventListener('scroll', onScroll, { passive: true });
+
+
+/* ════════════════════════════════════════════
+   INTERSECTION OBSERVER — reveal on scroll
+   ════════════════════════════════════════════ */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('in');
+      // also trigger section-label line draw
+      if (e.target.classList.contains('section-label')) {
+        e.target.classList.add('revealed');
+      }
+      io.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+document.querySelectorAll('.r, .section-label').forEach(el => io.observe(el));
+
+
+/* ════════════════════════════════════════════
+   CUSTOM CURSOR
+   ════════════════════════════════════════════ */
+const dot  = document.getElementById('cursor-dot');
+const ring = document.getElementById('cursor-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  dot.style.left = mx + 'px';
+  dot.style.top  = my + 'px';
+});
+
+(function animCursor() {
+  rx += (mx - rx) * 0.13;
+  ry += (my - ry) * 0.13;
+  ring.style.left = rx + 'px';
+  ring.style.top  = ry + 'px';
+  requestAnimationFrame(animCursor);
+})();
+
+const hoverEls = document.querySelectorAll('a, button, .pillar, .focus-item, input, textarea, select');
+hoverEls.forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    dot.style.transform  = 'translate(-50%,-50%) scale(2.5)';
+    ring.style.width     = '54px';
+    ring.style.height    = '54px';
+    ring.style.borderColor = 'rgba(255,255,255,0.55)';
+  });
+  el.addEventListener('mouseleave', () => {
+    dot.style.transform  = 'translate(-50%,-50%) scale(1)';
+    ring.style.width     = '32px';
+    ring.style.height    = '32px';
+    ring.style.borderColor = 'rgba(255,255,255,0.3)';
+  });
+});
+</script>
+</body>
+</html>
