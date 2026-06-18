@@ -123,6 +123,32 @@
 
     .nav-links a:hover { color: var(--white); }
 
+    /* hamburger toggle — hidden on desktop, shown on mobile */
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      z-index: 120;
+    }
+    .nav-toggle span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--white);
+      transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), opacity 0.25s;
+    }
+    nav.light .nav-toggle span { background: #111; }
+    nav.menu-open .nav-toggle span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    nav.menu-open .nav-toggle span:nth-child(2) { opacity: 0; }
+    nav.menu-open .nav-toggle span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
     /* light nav state */
     nav.light { background: rgba(245,244,240,0.92) !important; backdrop-filter: blur(16px); border-bottom: 1px solid rgba(0,0,0,0.06) !important; }
     nav.light .nav-logo { color: #111; }
@@ -692,7 +718,27 @@
 
     @media (max-width: 900px) {
       nav { padding: 24px; }
-      .nav-links { display: none; }
+      .nav-toggle { display: flex; }
+      .nav-links {
+        position: fixed;
+        top: 0; right: 0;
+        width: min(78vw, 320px);
+        height: 100vh;
+        flex-direction: column;
+        justify-content: center;
+        gap: 32px;
+        padding: 0 40px;
+        background: rgba(10,10,10,0.97);
+        backdrop-filter: blur(20px);
+        border-left: 1px solid rgba(201,168,76,0.18);
+        transform: translateX(100%);
+        transition: transform 0.45s cubic-bezier(0.16,1,0.3,1);
+        z-index: 110;
+      }
+      nav.menu-open .nav-links { transform: translateX(0); }
+      .nav-links a { font-size: 15px; color: var(--white); }
+      /* keep menu panel dark even when nav is in light state */
+      nav.light .nav-links a { color: var(--white); }
       section { padding: 80px 24px; }
       #hero { padding: 0 24px 80px; }
       .thesis-grid, .apply-grid, .focus-grid, .brand-grid { grid-template-columns: 1fr; gap: 2px; }
@@ -729,6 +775,9 @@
     <li><a href="#apply">Apply</a></li>
     <li><a href="/brand-kit.html">Brand</a></li>
   </ul>
+  <button id="nav-toggle" class="nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="nav">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
 <!-- HERO -->
@@ -1034,6 +1083,21 @@ drawWind();
    ════════════════════════════════════════════ */
 const nav      = document.getElementById('nav');
 const progress = document.getElementById('progress');
+
+// mobile menu toggle
+const navToggle = document.getElementById('nav-toggle');
+if (navToggle) {
+  const setMenu = (open) => {
+    nav.classList.toggle('menu-open', open);
+    navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    document.body.style.overflow = open ? 'hidden' : '';
+  };
+  navToggle.addEventListener('click', () => setMenu(!nav.classList.contains('menu-open')));
+  document.querySelectorAll('.nav-links a').forEach(a =>
+    a.addEventListener('click', () => setMenu(false))
+  );
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') setMenu(false); });
+}
 const heroContent = document.querySelector('.hero-content');
 const applySection = document.getElementById('apply');
 
