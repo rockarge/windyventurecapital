@@ -1,0 +1,7 @@
+# Yerel çalışma dosyaları — repoya girmez (25 Tem 2026)
+# deploy_wvc.command sadece açık dosya listesini stage'ler, ama
+# yanlışlıkla `git add -A` çalıştırılırsa bu dosya ikinci savunma katmanı.
+.DS_Store
+WVC_Assets/
+Windy_Venture_Capital/
+*.command
